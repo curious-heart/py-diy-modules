@@ -11,21 +11,28 @@ def exit_prog(code, usage_str = ""):
     if usage_str: print(usage_str)
     sys.exit(code)
 
-def split_fpn(pfn):
+def split_fpn(fpn):
     """
     parameters:
-        pfn: file name with path.
+        fpn: file name with path.
 
     return dir_name, base_name, ext
     dir_name has \ as tail
     """
-    d, ext = os.path.splitext(pfn)
+    d, ext = os.path.splitext(fpn)
     dir_name = os.path.dirname(d)
     base_name = os.path.basename(d)
     if '' == dir_name:
         dir_name = os.path.abspath(os.path.curdir)
     dir_name += '\\'
     return dir_name, base_name, ext
+
+def change_ext(fpn, n_ext):
+    """
+    Change the extension name to n_ext.
+    """
+    d_n, b_n, e_n = split_fpn(fpn)
+    return d_n + b_n + n_ext
 
 def read_ch_path_img(img_fn):
     """

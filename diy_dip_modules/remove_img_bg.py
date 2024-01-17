@@ -35,6 +35,7 @@ def rm_img_bg_by_bgcolor(fpn, bgc = _WHITE_3P, write_file = True):
     if len(img_rmbg) == 0:
         return None
 
+    bgc_list = []
     bgc = np.array(bgc)
     if(len(bgc.shape) == 1): #(r,g,b) format
         bgc = np.array((bgc,))
@@ -107,3 +108,17 @@ def rm_img_bg_by_contour(fpn, df_d = _DF_D, ord = 'r+c', write_file = True):
         ret_fpn = dct.add_apx_to_bn(fpn, _RMBG_APX_STR)
         ret_fpn = dct.change_ext(ret_fpn, '.png')
         dct.write_ch_path_img(ret_fpn, img_rmbg, '.png')
+
+def rm_img_bg_gray_list(fpn, gray_c_list, delta = 0, write_file = True):
+    bgc_list = [(c,c,c) for c in gray_c_list]
+    del_part = [(c,c,c+1) for c in gray_c_list]
+    bgc_list += del_part
+
+    rm_img_bg_by_bgcolor(fpn, bgc_list, write_file)
+
+def rm_img_bg_gray_range(fpn, gray_s, gray_e, delta = 0, write_file = True):
+    bgc_list = [(c,c,c) for c in range(gray_s, gray_e +1)]
+    del_part = [(c,c,c+1) for c in range(gray_s, gray_e +1)]
+    bgc_list += del_part
+
+    rm_img_bg_by_bgcolor(fpn, bgc_list, write_file)

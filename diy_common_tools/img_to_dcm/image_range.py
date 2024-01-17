@@ -27,7 +27,7 @@ def str2tuple(s):
     return tuple(int(i) for i in t)
 
 if not(len(sys.argv) in range(3,5)):
-    print("用法:\n\timage_range.py raw文件名 灰度值范围 [remap to 灰度值范围]")
+    print("用法:\n\timage_range.py raw文件名 灰度值范围 [remap_to_灰度值范围 | 'move']")
     print("\t灰度值范围 格式为：(最小值,最大值)")
     sys.exit(0)
 
@@ -46,7 +46,10 @@ tgt_img = img.copy()
 tgt_img[np.logical_not(mask)] = 0
 cv.imwrite(tgt_fpn + ".tiff", tgt_img, (cv.IMWRITE_TIFF_COMPRESSION, 1))
 if remap_val_range_str:
-    remap_val_range = str2tuple(remap_val_range_str)
+    if 'move' == remap_val_range_str:
+        remap_val_range = (0, val_range[1] - val_range[0])
+    else:
+        remap_val_range = str2tuple(remap_val_range_str)
     tmp = np.float64(tgt_img) - np.min(tgt_img)
     tmp[tmp < 0] = 0
     tmp *= (np.float64((remap_val_range[1] - remap_val_range[0])) / np.float64(np.max(tgt_img) - np.min(tgt_img)))

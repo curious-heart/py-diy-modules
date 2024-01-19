@@ -26,24 +26,32 @@ def str2tuple(s):
     t = s.replace(' ', '')[1:-1].split(',')
     return tuple(int(i) for i in t)
 
-if not(len(sys.argv) in range(3,5)):
-    print("用法:\n\timage_range.py raw文件名 灰度值范围 [remap_to_灰度值范围 | 'move']")
+if not(len(sys.argv) in range(3,6)):
+    print("用法:\n\timage_range.py image文件名 灰度值范围 [-e] [remap_to_灰度值范围 | 'move']")
     print("\t灰度值范围 格式为：(最小值,最大值)")
     sys.exit(0)
 
 img_file_fpn, val_range_str = sys.argv[1:3]
 val_range = str2tuple(val_range_str)
-remap_val_range_str = sys.argv[3] if len(sys.argv) >= 4 else ""
+extend_edge = ('-e' == sys.argv[3]) if len(sys.argv) >= 4 else False
+p_l_maxlen = 5 if extend_edge else 4
+remap_val_range_str = sys.argv[p_l_maxlen - 1] if len(sys.argv) >= p_l_maxlen else ""
 fpn, ext = os.path.splitext(img_file_fpn)
 tgt_fpn = fpn + "_in_" + str(val_range[0]) + "_" + str(val_range[1])
+if extend_edge: tgt_fpn += "_extend_edge"
 
 img = cv.imread(img_file_fpn, cv.IMREAD_UNCHANGED)
 L, type_func = img_dtype_check(img.dtype)
 assert L > 0 and type_func, _img_dtype_range_str
 
-mask = np.logical_and(val_range[0] <= img, img <= val_range[1])
+[below_mask, above_mask] = (img < val_range[0], img > val_range[1])
+mask = np.logical_and(np.logical_not(below_mask), np.logical_not(above_mask))
 tgt_img = img.copy()
-tgt_img[np.logical_not(mask)] = 0
+if extend_edge:
+    tgt_img[below_mask] = val_range[0]
+    tgt_img[above_mask] = val_range[1]
+else:
+    tgt_img[np.logical_not(mask)] = 0
 cv.imwrite(tgt_fpn + ".tiff", tgt_img, (cv.IMWRITE_TIFF_COMPRESSION, 1))
 if remap_val_range_str:
     if 'move' == remap_val_range_str:

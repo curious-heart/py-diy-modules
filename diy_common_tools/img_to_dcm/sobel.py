@@ -28,9 +28,9 @@ def str2tuple(s):
 
 _usage_string = \
 """
-usage: sobel.py img_file_name [dx [dy [ksize [scale [delta [bordertype]]]]]]
+usage: sobel.py img_file_name [-so]
 """
-if not(len(sys.argv) in range(2,9)):
+if not(len(sys.argv) in range(2,4)):
     print(_usage_string)
     sys.exit(0)
 
@@ -38,6 +38,7 @@ dx = 1
 dy = 1
 ksize = 3
 img_file_fpn = sys.argv[1]
+statistic_only = (len(sys.argv) == 3 and '-so' == sys.argv[2])
 fpn, ext = os.path.splitext(img_file_fpn)
 tgt_fpn = fpn + "_sobel_" + str(dx) + "_" + str(dy) + ".tiff"
 sharp_tgt_fpn = fpn + "_sobel_" + str(dx) + "_" + str(dy) + "_sharp.tiff"
@@ -49,13 +50,14 @@ tmp = np.float64(img)
 dst = np.zeros_like(img)
 sobel_x = np.abs(cv.Sobel(tmp, cv.CV_64F, dx, 0, dst, ksize))
 sobel_y = np.abs(cv.Sobel(tmp, cv.CV_64F, 0, dy, dst, ksize))
-sobel_ret = sobel_x + sobel_y #cv.addWeighted(sobel_x, 0.5, sobel_y, 0.5, 0)
+sobel_ret = cv.addWeighted(sobel_x, 0.5, sobel_y, 0.5, 0)
 sharp = tmp + sobel_ret
 sobel_ret = type_func(sobel_ret)
 sharp = type_func(sharp)
 
-cv.imwrite(tgt_fpn, sobel_ret, (cv.IMWRITE_TIFF_COMPRESSION, 1))
-cv.imwrite(sharp_tgt_fpn, sharp, (cv.IMWRITE_TIFF_COMPRESSION, 1))
+if not statistic_only:
+    cv.imwrite(tgt_fpn, sobel_ret, (cv.IMWRITE_TIFF_COMPRESSION, 1))
+    cv.imwrite(sharp_tgt_fpn, sharp, (cv.IMWRITE_TIFF_COMPRESSION, 1))
 
 print("sobel result statistic:")
 print("min:\t" + str(np.min(sobel_ret)))

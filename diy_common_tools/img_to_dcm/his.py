@@ -62,10 +62,11 @@ _param_err_str = "invalid parameters. please check the func doc string."
 _range_doc_str = \
 """
 work_range: str
-    'full': (0, 255) or (0, 65535)
     'minmax': (min, max)
+    'full': (0, 255) or (0, 65535)
     '(w_low, w_high)'
 out_range_mode:str
+    'extend_edge': original value below/above range are set to after-equ-low/high
     'as': leave it alone
     'zero': all 0
     'max': all 255 or 65535
@@ -76,12 +77,14 @@ def hist_equalization_single_ch(ori_img, work_range, out_range_mode):
     L, type_func = img_dtype_check(ori_img.dtype)
     assert L > 0 and type_func, _img_dtype_range_str
 
-    if (not work_range) or ('full' == work_range): w_low, w_high = 0, L-1
-    elif 'minmax' == work_range: w_low, w_high = np.min(ori_img), np.max(ori_img)
+    if (not work_range) or ('minmax' == work_range): w_low, w_high = np.min(ori_img), np.max(ori_img)
+    elif 'full' == work_range: w_low, w_high = 0, L-1
     else: [w_low, w_high]= str2tuple(work_range)[0:2]
 
+    out_range_extend_edge = False
     leave_out_range_as = False
-    if (not out_range_mode) or ('as' == out_range_mode): leave_out_range_as = True
+    if (not out_range_mode) or ('extend_edge' == out_range_mode): out_range_extend_edge = True
+    elif 'as' == out_range_mode: leave_out_range_as = True
     elif 'zero' == out_range_mode: below_v = above_v = 0
     elif 'max' == out_range_mode:  below_v = above_v = L - 1
     else: [below_v, above_v] = str2tuple(out_range_mode)[0:2]
@@ -91,7 +94,9 @@ def hist_equalization_single_ch(ori_img, work_range, out_range_mode):
     start_time = datetime.datetime.now()
     print("start:\t" + str(start_time))
 
-    range_mask = np.logical_and(w_low <= ori_img, ori_img <= w_high)
+    below_range_mask = ori_img < w_low 
+    above_range_mask = ori_img > w_high 
+    range_mask = np.logical_and(np.logical_not(below_range_mask), (np.logical_not(above_range_mask)))
     MN = np.count_nonzero(range_mask)
     coeffient = (w_high - w_low) / MN
     if leave_out_range_as:
@@ -108,9 +113,13 @@ def hist_equalization_single_ch(ori_img, work_range, out_range_mode):
         le_r_cnt += cur_cnt
         tgt_img[mask] = coeffient * le_r_cnt
 
+    if out_range_extend_edge:
+        below_v = np.min(tgt_img[range_mask])
+        above_v = np.max(tgt_img[range_mask])
+
     if not leave_out_range_as:
-        if 0 != below_v: tgt[ori_img < w_low] = below_v
-        if 0 != above_v: tgt[ori_img > w_high] = above_v
+        if 0 != below_v: tgt_img[below_range_mask] = below_v
+        if 0 != above_v: tgt_img[above_range_mask] = above_v
 
     tgt_img = type_func(tgt_img)
 

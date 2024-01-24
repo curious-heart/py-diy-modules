@@ -98,10 +98,10 @@ input_file_fpn = sys.argv[1]
 fbn, ext = os.path.splitext(input_file_fpn)
 if (not ext) or ('.raw' == ext) or ('.aof' == ext):
     #raw file
-    if len(sys.argv) <= 4:
+    if len(sys.argv) < 4:
         print(_usage_str)
         sys.exit(0)
-    img_shape_str, dept = sys.argv[2:4]
+    img_shape_str, dept = sys.argv[2], int(sys.argv[3])
     img_shape = str2tuple(img_shape_str)
     data_type = np.uint16 if 16 == dept else np.uint8
     pixel_bits = 16 if np.uint16 == data_type else 8

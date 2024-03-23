@@ -35,10 +35,11 @@ if len(img.shape) > 3:
 
 if len(img.shape) == 3:
     img = img[:,:,0]
+print("image shape: width {}, height {}".format(img.shape[1], img.shape[0]))
 
 s_areas = get_sample_areas(img.shape[1], img.shape[0])
 a_num = len(s_areas)
-vis = tuple(np.average(img[a[0]:a[0]+a[2], a[1]:a[1]+a[3]]) for a in s_areas)
+vis = tuple(np.average(img[a[1]:a[1]+a[3], a[0]:a[0]+a[2]]) for a in s_areas)
 for i in range(a_num): print(s_areas[i], end=""); print(":\t" + str(vis[i]))
 
 vm = np.average(vis)

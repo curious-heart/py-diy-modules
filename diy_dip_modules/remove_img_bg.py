@@ -54,7 +54,7 @@ def rm_img_bg_by_bgcolor(fpn, bgc = _WHITE_3P, write_file = True):
     if write_file:
         ret_fpn = dct.add_apx_to_bn(fpn, _RMBG_APX_STR)
         ret_fpn = dct.change_ext(ret_fpn, '.png')
-        dct.write_ch_path_img(ret_fpn, img_rmbg, '.png')
+        dct.write_ch_path_img(ret_fpn, img_rmbg) #, '.png')
     return img_rmbg
 
 _DF_D = (5, 5, 5)
@@ -107,7 +107,7 @@ def rm_img_bg_by_contour(fpn, df_d = _DF_D, ord = 'r+c', write_file = True):
     if write_file:
         ret_fpn = dct.add_apx_to_bn(fpn, _RMBG_APX_STR)
         ret_fpn = dct.change_ext(ret_fpn, '.png')
-        dct.write_ch_path_img(ret_fpn, img_rmbg, '.png')
+        dct.write_ch_path_img(ret_fpn, img_rmbg) #, '.png')
 
 def rm_img_bg_gray_list(fpn, gray_c_list, delta = 0, write_file = True):
     bgc_list = [(c,c,c) for c in gray_c_list]

@@ -32,7 +32,7 @@ def change_ext(fpn, n_ext):
     Change the extension name to n_ext.
     """
     d_n, b_n, e_n = split_fpn(fpn)
-    return d_n + b_n + n_ext
+    return d_n + '\\' + b_n + n_ext
 
 def read_ch_path_img(img_fn):
     """
